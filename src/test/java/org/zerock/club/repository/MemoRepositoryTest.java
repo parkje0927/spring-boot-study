@@ -4,6 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.club.entity.Memo;
 
@@ -82,5 +86,41 @@ class MemoRepositoryTest {
         //select 이후 -> delete
         //해당 데이터가 존재하지 않으면 예외 발생
         memoRepository.deleteById(100L);
+    }
+
+    @DisplayName("페이징 처리")
+    @Test
+    void pagingTest() {
+        Pageable pageable = PageRequest.of(0, 10); //1페이지 10개 데이터
+        Page<Memo> result = memoRepository.findAll(pageable);
+        result.getContent().forEach(r -> System.out.println(r.toString()));
+        System.out.println("====================");
+
+        System.out.println("총 몇 페이지 = " + result.getTotalPages());
+        System.out.println("전체 개수 = " + result.getTotalElements());
+        System.out.println("현재 페이지 번호 / 0부터 시작 = " + result.getNumber());
+        System.out.println("페이지당 데이터 개수 = " + result.getSize());
+        System.out.println("다음 페이지 존재 여부 = " + result.hasNext());
+        System.out.println("시작페이지(0) 여부 = " + result.isFirst());
+    }
+
+    @DisplayName("정렬 조건 처리")
+    @Test
+    void sortTest() {
+        Sort sort1 = Sort.by("mno").descending();
+        Pageable pageable = PageRequest.of(0, 10, sort1);
+
+        Page<Memo> result = memoRepository.findAll(pageable);
+        result.get().forEach(r -> System.out.println(r.toString()));
+
+        System.out.println("====================");
+        //정렬 조건 여러 개
+        Sort sort2 = Sort.by("mno").descending();
+        Sort sort3 = Sort.by("memoText").ascending();
+        Sort sortAll = sort1.and(sort2);
+
+        Pageable pageable1 = PageRequest.of(0, 10, sortAll);
+        result = memoRepository.findAll(pageable);
+        result.get().forEach(r -> System.out.println(r.toString()));
     }
 }
