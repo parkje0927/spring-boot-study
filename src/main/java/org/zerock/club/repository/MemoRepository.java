@@ -18,4 +18,5 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
 
     @Query(value = "select * from memo where mno > 0", nativeQuery = true)
     List<Object[]> findNativeResult();
+    
 }
